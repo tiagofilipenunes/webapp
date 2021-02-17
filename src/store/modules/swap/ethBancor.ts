@@ -225,7 +225,8 @@ import {
   getWelcomeData,
   NewPool,
   WelcomeData,
-  TokenMetaWithReserve
+  TokenMetaWithReserve,
+  Pool
 } from "@/api/eth/bancorApi";
 import { PoolProgram } from "../rewards";
 
@@ -6022,6 +6023,10 @@ export class EthBancorModule
     );
   }
 
+  @action async fetchAndSetPools(pools: Pool[]) {
+
+  }
+
   @action async init() {
     if (this.initiated) {
       return this.refresh();
@@ -6077,6 +6082,21 @@ export class EthBancorModule
       distinctArrayItem(knownPools, compareAnchorAndConverter),
       shareReplay<ConverterAndAnchor[]>(3000)
     );
+
+    const misMatched = combineLatest([apiData$, anchorAndConverters$]).pipe(
+      map(([apiData, anchorsAndConverters]) => {
+
+        const pools = apiData.pools;
+        const badPools = pools.filter(pool => {
+          const foundAnchor = anchorsAndConverters.find(anchorAndConverter => compareString(pool.pool_dlt_id, anchorAndConverter.anchorAddress));
+          if (!foundAnchor) return false;
+          return !compareString(pool.converter_dlt_id, foundAnchor.converterAddress)
+        });
+
+        const fixedPools = badPools.map(pool => ({ ...pool, converter_dlt_id: findOrThrow(anchorsAndConverters, x => compareString(x.anchorAddress, pool.pool_dlt_id)).converterAddress} ))
+        return fixedPools;
+      })
+    ).subscribe(fixedPools => this.fetchAndSetPools(fixedPools))
 
     if (this.currentUser) {
       authenticated$.next(this.currentUser);
