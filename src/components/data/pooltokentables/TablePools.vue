@@ -112,6 +112,7 @@ export default class TablePools extends BaseComponent {
               id: 1,
               label: "",
               key: "liquidityProtection",
+              tooltip: i18n.tc("whitelisted_status"),
               minWidth: "70px",
               maxWidth: "70px"
             }

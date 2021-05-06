@@ -208,6 +208,7 @@ export const en = {
   token_reserve_ratio: "Token Reserve Ratio",
   remove: "Remove",
   add: "Add",
+  whitelisted_status: "Whitelisted pools with impermanent loss protection",
   liquidity: "Liquidity",
   prices_pool_share: "Prices and Pool Share",
   supply: "Supply",
